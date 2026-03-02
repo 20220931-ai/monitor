@@ -2,10 +2,10 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Monitoreo de Tinacos</title>
+  <title>Monitoreo Tinaco 1</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Firebase v8 (compatible con GitHub Pages) -->
+  <!-- Firebase v8 -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
@@ -23,73 +23,49 @@
     }
 
     .contenedor {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 20px;
+      display: flex;
+      justify-content: center;
       padding: 20px;
-      max-width: 1000px;
-      margin: auto;
     }
 
     .tinaco {
       background: #ffffff;
       border-radius: 12px;
-      padding: 20px;
+      padding: 30px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
-
-    .tinaco h3 {
-      margin-bottom: 10px;
+      width: 250px;
     }
 
     .valor {
-      font-size: 32px;
+      font-size: 36px;
       font-weight: bold;
       color: #007bff;
     }
 
-    .unidad {
-      font-size: 14px;
-      color: #666;
+    .dato {
+      font-size: 18px;
+      margin-top: 10px;
     }
   </style>
 </head>
 
 <body>
 
-  <h1>Monitoreo de Tinacos</h1>
+  <h1>Monitoreo Tinaco 1</h1>
 
   <div class="contenedor">
     <div class="tinaco">
       <h3>Tinaco 1</h3>
-      <div class="valor" id="t1">--</div>
-      <div class="unidad">cm</div>
-    </div>
-
-    <div class="tinaco">
-      <h3>Tinaco 2</h3>
-      <div class="valor" id="t2">--</div>
-      <div class="unidad">cm</div>
-    </div>
-
-    <div class="tinaco">
-      <h3>Tinaco 3</h3>
-      <div class="valor" id="t3">--</div>
-      <div class="unidad">cm</div>
-    </div>
-
-    <div class="tinaco">
-      <h3>Tinaco 4</h3>
-      <div class="valor" id="t4">--</div>
-      <div class="unidad">cm</div>
+      <div class="valor" id="cm">--</div>
+      <div class="dato">cm</div>
+      <div class="dato">Nivel: <span id="nivel">--</span> %</div>
+      <div class="dato">Alarma: <span id="alarma">--</span></div>
     </div>
   </div>
 
   <script>
-    // 🔥 CONFIGURACIÓN DE FIREBASE
-    // 👉 PEGA AQUÍ LOS DATOS DE TU APP WEB DE FIREBASE
     var firebaseConfig = {
-       apiKey: "AIzaSyBt1Xm-oijKo-g0dZYuF55s8mbLsgKq6_g",
+      apiKey: "AIzaSyBt1Xm-oijKo-g0dZYuF55s8mbLsgKq6_g",
       authDomain: "monitoreo-tinacos-marpa.firebaseapp.com",
       databaseURL: "https://monitoreo-tinacos-marpa-default-rtdb.firebaseio.com",
       projectId: "monitoreo-tinacos-marpa",
@@ -98,25 +74,19 @@
       appId: "1:812581613905:web:7835af96923a2578682370"
     };
 
-    // Inicializar Firebase
     firebase.initializeApp(firebaseConfig);
     var database = firebase.database();
 
-    // Función para leer datos
-    function leerTinaco(elemento, ruta) {
-      database.ref(ruta).on("value", function(snapshot) {
-        var valor = snapshot.val();
-        document.getElementById(elemento).innerHTML =
-          valor !== null ? valor : "--";
-      });
-    }
+    // Leer Tinaco 1 completo
+    database.ref("tinacos/tinaco1").on("value", function(snapshot) {
+      var data = snapshot.val();
 
-    // Lectura de los 4 tinacos
-    leerTinaco("t1", "tinacos/tinaco1");
-    leerTinaco("t2", "tinacos/tinaco2");
-    leerTinaco("t3", "tinacos/tinaco3");
-    leerTinaco("t4", "tinacos/tinaco4");
-
+      if (data) {
+        document.getElementById("cm").innerHTML = data.cm ?? "--";
+        document.getElementById("nivel").innerHTML = data.nivel ?? "--";
+        document.getElementById("alarma").innerHTML = data.alarma ?? "--";
+      }
+    });
   </script>
 
 </body>
