@@ -15,7 +15,7 @@
   <style>
     body {
       margin: 0;
-      background: #ffffff;
+      background: #f8f9fa;
       font-family: Arial, sans-serif;
       display: flex;
       flex-direction: column;
@@ -38,14 +38,14 @@
       position: absolute;
       top: 50%;
       left: 50%;
-      transform: translate(-50%, -60%);
-      font-size: 40px;
+      transform: translate(-50%, -55%);
+      font-size: 42px;
       font-weight: bold;
     }
 
     #valorCm {
-      margin-top: 15px;
-      font-size: 26px;
+      margin-top: 20px;
+      font-size: 24px;
       color: #444;
     }
 
@@ -70,7 +70,7 @@
 
 <script>
   var firebaseConfig = {
-    apiKey: "AIzaSyBt1Xm-oijKo-g0dZYuF55s8mbLsgKq6_g",
+    apiKey: "TU_API_KEY",
     authDomain: "monitoreo-tinacos-marpa.firebaseapp.com",
     databaseURL: "https://monitoreo-tinacos-marpa-default-rtdb.firebaseio.com",
     projectId: "monitoreo-tinacos-marpa"
@@ -86,15 +86,19 @@
     data: {
       datasets: [{
         data: [0, 100],
-        backgroundColor: ['#2196f3', '#eeeeee'],
+        backgroundColor: ['#2196f3', '#e0e0e0'],
         borderWidth: 0
       }]
     },
     options: {
-      rotation: -90,
-      circumference: 180,
       cutout: '75%',
-      plugins: { legend: { display: false } }
+      rotation: -90,
+      circumference: 360,
+      plugins: { legend: { display: false } },
+      animation: {
+        animateRotate: true,
+        duration: 800
+      }
     }
   });
 
@@ -118,12 +122,12 @@
       }
 
       gaugeChart.data.datasets[0].data = [nivel, 100 - nivel];
-      gaugeChart.data.datasets[0].backgroundColor = [color, "#eeeeee"];
+      gaugeChart.data.datasets[0].backgroundColor = [color, "#e0e0e0"];
       gaugeChart.update();
 
       document.getElementById("valorPorcentaje").innerHTML = nivel + "%";
-      document.getElementById("valorCm").innerHTML = cm + " cm";
       document.getElementById("valorPorcentaje").style.color = color;
+      document.getElementById("valorCm").innerHTML = cm + " cm";
       document.getElementById("alarma").innerHTML = textoAlarma;
       document.getElementById("alarma").style.color = color;
     }
