@@ -2,92 +2,133 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Monitoreo Tinaco 1</title>
+  <title>ESP32 Water Level</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Firebase v8 -->
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #f2f2f2;
       margin: 0;
-      padding: 0;
-      text-align: center;
-    }
-
-    h1 {
-      margin: 20px 0;
-    }
-
-    .contenedor {
-      display: flex;
-      justify-content: center;
-      padding: 20px;
-    }
-
-    .tinaco {
       background: #ffffff;
-      border-radius: 12px;
-      padding: 30px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      width: 250px;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
     }
 
-    .valor {
-      font-size: 36px;
+    h2 {
+      margin-bottom: 20px;
+    }
+
+    .gauge-container {
+      width: 280px;
+      height: 280px;
+      position: relative;
+    }
+
+    #valorPorcentaje {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -60%);
+      font-size: 40px;
       font-weight: bold;
-      color: #007bff;
     }
 
-    .dato {
-      font-size: 18px;
+    #valorCm {
+      margin-top: 15px;
+      font-size: 26px;
+      color: #444;
+    }
+
+    #alarma {
       margin-top: 10px;
+      font-size: 20px;
+      font-weight: bold;
     }
   </style>
 </head>
-
 <body>
 
-  <h1>Monitoreo Tinaco 1</h1>
+<h2>ESP32 Water Level</h2>
 
-  <div class="contenedor">
-    <div class="tinaco">
-      <h3>Tinaco 1</h3>
-      <div class="valor" id="cm">--</div>
-      <div class="dato">cm</div>
-      <div class="dato">Nivel: <span id="nivel">--</span> %</div>
-      <div class="dato">Alarma: <span id="alarma">--</span></div>
-    </div>
-  </div>
+<div class="gauge-container">
+  <canvas id="gauge"></canvas>
+  <div id="valorPorcentaje">0%</div>
+</div>
 
-  <script>
-    var firebaseConfig = {
-      apiKey: "AIzaSyBt1Xm-oijKo-g0dZYuF55s8mbLsgKq6_g",
-      authDomain: "monitoreo-tinacos-marpa.firebaseapp.com",
-      databaseURL: "https://monitoreo-tinacos-marpa-default-rtdb.firebaseio.com",
-      projectId: "monitoreo-tinacos-marpa",
-      storageBucket: "monitoreo-tinacos-marpa.firebasestorage.app",
-      messagingSenderId: "812581613905",
-      appId: "1:812581613905:web:7835af96923a2578682370"
-    };
+<div id="valorCm">0 cm</div>
+<div id="alarma">--</div>
 
-    firebase.initializeApp(firebaseConfig);
-    var database = firebase.database();
+<script>
+  var firebaseConfig = {
+    apiKey: "AIzaSyBt1Xm-oijKo-g0dZYuF55s8mbLsgKq6_g",
+    authDomain: "monitoreo-tinacos-marpa.firebaseapp.com",
+    databaseURL: "https://monitoreo-tinacos-marpa-default-rtdb.firebaseio.com",
+    projectId: "monitoreo-tinacos-marpa"
+  };
 
-    // Leer Tinaco 1 completo
-    database.ref("tinacos/tinaco1").on("value", function(snapshot) {
-      var data = snapshot.val();
+  firebase.initializeApp(firebaseConfig);
+  var database = firebase.database();
 
-      if (data) {
-        document.getElementById("cm").innerHTML = data.cm ?? "--";
-        document.getElementById("nivel").innerHTML = data.nivel ?? "--";
-        document.getElementById("alarma").innerHTML = data.alarma ?? "--";
+  const ctx = document.getElementById('gauge').getContext('2d');
+
+  let gaugeChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      datasets: [{
+        data: [0, 100],
+        backgroundColor: ['#2196f3', '#eeeeee'],
+        borderWidth: 0
+      }]
+    },
+    options: {
+      rotation: -90,
+      circumference: 180,
+      cutout: '75%',
+      plugins: { legend: { display: false } }
+    }
+  });
+
+  database.ref("tinacos/tinaco1").on("value", function(snapshot) {
+    var data = snapshot.val();
+    if (data) {
+
+      let nivel = data.nivel || 0;
+      let cm = data.cm || 0;
+
+      let color = "#2196f3";
+      let textoAlarma = "NIVEL NORMAL";
+
+      if (nivel <= 20) {
+        color = "#f44336";
+        textoAlarma = "⚠️ VACÍO";
+      } 
+      else if (nivel >= 80) {
+        color = "#4caf50";
+        textoAlarma = "✔️ LLENO";
       }
-    });
-  </script>
+
+      gaugeChart.data.datasets[0].data = [nivel, 100 - nivel];
+      gaugeChart.data.datasets[0].backgroundColor = [color, "#eeeeee"];
+      gaugeChart.update();
+
+      document.getElementById("valorPorcentaje").innerHTML = nivel + "%";
+      document.getElementById("valorCm").innerHTML = cm + " cm";
+      document.getElementById("valorPorcentaje").style.color = color;
+      document.getElementById("alarma").innerHTML = textoAlarma;
+      document.getElementById("alarma").style.color = color;
+    }
+  });
+</script>
 
 </body>
 </html>
